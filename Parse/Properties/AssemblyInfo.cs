@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Parse")]
-[assembly: AssemblyDescription("Makes accessing services from Parse native and straightforward.")]
+[assembly: AssemblyDescription("Makes accessing services from Parse native and straightforward.\nINDG  - Port from 1.7.0 for Unity 4.6.7.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Parse")]

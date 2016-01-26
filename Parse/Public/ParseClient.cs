@@ -2,6 +2,7 @@
 
 using Parse.Internal;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -111,11 +112,14 @@ namespace Parse {
     /// </param>
     /// <param name="dotnetKey">The .NET API Key provided in the Parse dashboard.
     /// </param>
-    public static void Initialize(string applicationId, string dotnetKey) {
+	/// <param name="aApplicationBundleIdentifier"></param>
+	/// <param name="aApplicationProductName"></param>
+	/// <param name="aApplicationVersion"></param>
+    public static void Initialize(string applicationId, string dotnetKey, string aApplicationVersion, string aApplicationBundleIdentifier, string aApplicationProductName) {
       Initialize(new Configuration {
         ApplicationId = applicationId,
         WindowsKey = dotnetKey
-      });
+      }, aApplicationVersion, aApplicationBundleIdentifier, aApplicationProductName);
     }
 
     /// <summary>
@@ -126,7 +130,10 @@ namespace Parse {
     /// </summary>
     /// <param name="configuration">The configuration to initialize Parse with.
     /// </param>
-    public static void Initialize(Configuration configuration) {
+	/// <param name="aApplicationBundleIdentifier"></param>
+	/// <param name="aApplicationProductName"></param>
+	/// <param name="aApplicationVersion"></param>
+    public static void Initialize(Configuration configuration, string aApplicationVersion, string aApplicationBundleIdentifier, string aApplicationProductName) {
       lock (mutex) {
         configuration.Server = configuration.Server ?? "https://api.parse.com/1/";
         CurrentConfiguration = configuration;
@@ -137,11 +144,33 @@ namespace Parse {
         ParseObject.RegisterSubclass<ParseSession>();
 
         // Give platform-specific libraries a chance to do additional initialization.
-        PlatformHooks.Initialize();
-      }
+        PlatformHooks.Initialize(aApplicationVersion, aApplicationBundleIdentifier, aApplicationProductName);
+	  }
     }
+	
+	/// <summary>
+	/// Start dispatching requests when required, always call this after initialization.
+	/// </summary>
+	/// <returns>An <see cref="IEnumerator"/> which should be feed to a <c>StartCoroutine</c> method</returns>
+	public static IEnumerator Run()
+	{
+		if (Parse.PlatformHooks.IsIOS) {
+			Parse.PlatformHooks.RegisterDeviceTokenRequest((aDeviceToken) => 
+			{
+				if (aDeviceToken != null) {
+					ParseInstallation theInstallation = ParseInstallation.CurrentInstallation;
+					theInstallation.SetDeviceTokenFromData(aDeviceToken);
 
-    internal static Guid? InstallationId {
+					// Optimistically assume this will finish.
+					theInstallation.SaveAsync();
+				}
+			});
+		}
+
+		return Parse.PlatformHooks.RunDispatcher();
+	}
+	
+	internal static Guid? InstallationId {
       get {
         return ParseCorePlugins.Instance.InstallationIdController.Get();
       }
