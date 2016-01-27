@@ -29,6 +29,24 @@ namespace Parse {
     public string dotnetKey;
 
     /// <summary>
+    /// The application version number. Same as the Unity5 <see cref="Application.version"/>.
+    /// </summary>
+    [SerializeField]
+    public string applicationVersion;
+
+    /// <summary>
+    /// The bundle identifier of the application. Same as the Unity5 <see cref="Application.bundleIdentifier"/>.
+    /// </summary>
+    [SerializeField]
+    public string applicationBundleIdentifier;
+
+    /// <summary>
+    /// The name of the application. Same as the Unity5 <see cref="Application.productName"/>.
+    /// </summary>
+    [SerializeField]
+    public string applicationProductName;
+
+    /// <summary>
     /// Initializes the Parse SDK and begins running network requests created by Parse.
     /// </summary>
     public virtual void Awake() {
@@ -66,10 +84,10 @@ namespace Parse {
         // Keep this gameObject around, even when the scene changes.
         GameObject.DontDestroyOnLoad(gameObject);
 
-        ParseClient.Initialize(applicationID, dotnetKey);
+        ParseClient.Initialize(applicationID, dotnetKey, applicationVersion, applicationBundleIdentifier, applicationProductName);
 
         // Kick off the dispatcher.
-        StartCoroutine(PlatformHooks.RunDispatcher());
+        StartCoroutine(ParseClient.Run());
       }
     }
 
