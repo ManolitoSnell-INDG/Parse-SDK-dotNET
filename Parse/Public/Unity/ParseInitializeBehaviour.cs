@@ -87,7 +87,7 @@ namespace Parse {
         ParseClient.Initialize(applicationID, dotnetKey, applicationVersion, applicationBundleIdentifier, applicationProductName);
 
         // Kick off the dispatcher.
-        StartCoroutine(PlatformHooks.RunDispatcher());
+        StartCoroutine(ParseClient.Run());
       }
     }
 
